@@ -4,7 +4,15 @@ from doit.tools import run_once
 
 def task_getTheZip():
     datazip = 'data.zip'
-    return {
+    yield {
+        'name': datazip,
+        'targets': [datazip],
+        'uptodate': [run_once],
+        'actions': ['cp ../data.zip %s' % datazip] # would be a 'wget' in a different context
+        }
+    datazip = 'data2.zip'
+    yield {
+        'name': datazip,
         'targets': [datazip],
         'uptodate': [run_once],
         'actions': ['cp ../data.zip %s' % datazip] # would be a 'wget' in a different context
@@ -12,7 +20,6 @@ def task_getTheZip():
 
 
 def task_unzip():
-    # using glob, because in a real context, multiple zips would be downloaded
     for z in glob('*.zip'):
         folder = z.replace('.zip', '')
         yield {
