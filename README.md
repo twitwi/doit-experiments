@@ -5,3 +5,7 @@ The goal of this repository is to:
 - ask for comments and improvements on how I did things
 - provide/archive some typical patterns for myself
 
+Quick folder index:
+
+- raw-data-generator/ is just used for pre-generating things such as data.zip (can be ignored)
+- get-unzip-and-transform/ tries to cleanly get and extract a zip and then transform all files that were in the zip
