@@ -3,31 +3,30 @@ from glob import glob
 from doit.tools import run_once
 
 def task_getTheZip():
-    d = 'data.zip'
+    datazip = 'data.zip'
     return {
-        'targets': [d],
+        'targets': [datazip],
         'uptodate': [run_once],
-        'actions': ['cp ../data.zip %s' % d]
+        'actions': ['cp ../data.zip %s' % datazip] # would be a 'wget' in a different context
         }
 
 
 def task_unzip():
     for z in glob('*.zip'):
-        d = z.replace('.zip', '')
+        folder = z.replace('.zip', '')
         yield {
-            'name': d,
-            'targets': [d],
+            'name': folder,
+            'targets': [folder],
             'uptodate': [run_once],
-            'actions': [' mkdir -p %s ; (cd %s && unzip ../%s)' % (d,d,z) ]
+            'actions': [' rm -f %s/* ; mkdir -p %s ; (cd %s && unzip ../%s)' % (folder,folder,folder,z) ]
             }
-        for f in glob(d+'/*.txt'):
-            rep = f + '.future'
+        for f in glob(folder+'/*.txt'):
+            future = f + '.future'
             yield {
-                'name': rep,
-                'targets': [rep],
+                'name': future,
+                'targets': [future],
                 'file_dep': [f],
                 'uptodate': [run_once],
-                'actions': [""" cat %s | sed 's@This is@This gonna be@g' > %s """ % (f, rep) ]
-                
+                'actions': [""" cat %s | sed 's@this is@this gonna be... wait for it... @g' > %s """ % (f, future) ]
                 }
 
