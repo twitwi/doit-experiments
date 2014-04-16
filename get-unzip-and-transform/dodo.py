@@ -12,6 +12,7 @@ def task_getTheZip():
 
 
 def task_unzip():
+    # using glob, because in a real context, multiple zips would be downloaded
     for z in glob('*.zip'):
         folder = z.replace('.zip', '')
         yield {
