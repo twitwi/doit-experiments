@@ -1,40 +1,42 @@
-
 from glob import glob
+from subprocess import check_call
+
 from doit.tools import run_once
 
-def task_getTheZip():
-    datazip = 'data.zip'
-    yield {
-        'name': datazip,
-        'targets': [datazip],
-        'uptodate': [run_once],
-        'actions': ['cp ../data.zip %s' % datazip] # would be a 'wget' in a different context
-        }
-    datazip = 'data2.zip'
-    yield {
-        'name': datazip,
-        'targets': [datazip],
-        'uptodate': [run_once],
-        'actions': ['cp ../data.zip %s' % datazip] # would be a 'wget' in a different context
-        }
+ZIPS = ['data.zip', 'data2.zip']
 
+def task_getTheZip():
+    for datazip in ZIPS:
+        yield {
+            'name': datazip,
+            'targets': [datazip],
+            'uptodate': [run_once],
+            'actions': ['cp ../data.zip %s' % datazip] # would be a 'wget' in a different context
+            }
 
 def task_unzip():
-    for z in glob('*.zip'):
-        folder = z.replace('.zip', '')
+    for datazip in ZIPS:
+        folder = datazip.replace('.zip', '')
         yield {
             'name': folder,
+            'file_dep': [datazip],
             'targets': [folder],
-            'uptodate': [run_once],
-            'actions': [' rm -f %s/* ; mkdir -p %s ; (cd %s && unzip ../%s)' % (folder,folder,folder,z) ]
+            'actions': [' rm -f %s/* ; mkdir -p %s ; (cd %s && unzip ../%s)' % (folder,folder,folder,datazip) ]
             }
-        for f in glob(folder+'/*.txt'):
-            future = f + '.future'
-            yield {
-                'name': future,
-                'targets': [future],
-                'file_dep': [f],
-                'uptodate': [run_once],
-                'actions': [""" cat %s | sed 's@this is@this gonna be... wait for it... @g' > %s """ % (f, future) ]
-                }
+
+
+def transform(folder):
+    for f in glob(folder+'/*.txt'):
+        future = f + '.future'
+        check_call(""" cat %s | sed 's@this is@this gonna be... wait for it... @g' > %s """ % (f, future), shell=True)
+
+def task_transform():
+    for datazip in ZIPS:
+        folder = datazip.replace('.zip', '')
+
+        yield {
+            'name': folder,
+            'file_dep': [datazip],
+            'actions': [(transform, [folder])],
+            }
 
