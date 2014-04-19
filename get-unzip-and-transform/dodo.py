@@ -17,11 +17,13 @@ def task_getTheZip():
 def task_unzip():
     for datazip in ZIPS:
         folder = datazip.replace('.zip', '')
+        target = folder + '/.created'
         yield {
-            'name': folder,
+            'name': datazip,
             'file_dep': [datazip],
-            'targets': [folder],
-            'actions': [' rm -f %s/* ; mkdir -p %s ; (cd %s && unzip ../%s)' % (folder,folder,folder,datazip) ]
+            'targets': [target],
+            'actions': [' rm -fr %s/* ; mkdir -p %s ; (cd %s && unzip ../%s) && touch %s' %
+                        (folder,folder,folder,datazip,target) ]
             }
 
 
@@ -33,10 +35,9 @@ def transform(folder):
 def task_transform():
     for datazip in ZIPS:
         folder = datazip.replace('.zip', '')
-
         yield {
-            'name': folder,
-            'file_dep': [datazip],
+            'name': folder + "-all-futures",
+            'file_dep': [folder + '/.created'],
             'actions': [(transform, [folder])],
             }
 
